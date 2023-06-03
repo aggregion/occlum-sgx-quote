@@ -36,6 +36,8 @@ lazy_static! {
     };
 }
 
+// Client which send ioctls to the Occlum LibOS
+// @see https://github.com/occlum/occlum/blob/master/src/libos/src/fs/dev_fs/dev_sgx/mod.rs
 pub struct IoctlClient {
     fd: Option<i32>,
     quote_size: Option<u32>,

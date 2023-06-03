@@ -2,6 +2,7 @@ use occlum_sgx::{SGXMeasurement, SGXQuote};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let quote_buf = include_bytes!("../tests/fixtures/quote.raw");
+    // Restore SGX Quote from slice
     let quote = SGXQuote::from_slice(quote_buf)?;
 
     // Verify quote

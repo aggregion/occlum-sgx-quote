@@ -64,6 +64,7 @@ impl Deref for SGXQuote {
 }
 
 impl SGXQuote {
+    // Create a new SGXQuote from ReportData, it needs to be run on the SGX server in an Occlum instance (requires PCCS).
     pub fn from_report_data(data: &ReportData) -> Result<Self, SGXError> {
         let result = IOCTL_CLIENT
             .lock()
@@ -72,6 +73,7 @@ impl SGXQuote {
         Ok(result.try_into()?)
     }
 
+    // Restore SGXQuote from slice of bytes.
     pub fn from_slice(slice: &[u8]) -> Result<Self, SGXError> {
         slice.try_into()
     }
@@ -80,15 +82,17 @@ impl SGXQuote {
         &*self
     }
 
+    // Verify SGXQuote and return status
     pub fn verify_result(&self) -> Result<SGXQuoteVerifyResult, SGXError> {
         IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf.as_ref())
     }
 
-    pub fn verify(&self) -> Result<bool, SGXError> {
+    // Verify SGXQuote, if it is not valid, return error
+    pub fn verify(&self) -> Result<(), SGXError> {
         let result = self.verify_result()?;
 
         match result {
-            SGXQuoteVerifyResult::Ok => Ok(true),
+            SGXQuoteVerifyResult::Ok => Ok(()),
             SGXQuoteVerifyResult::ConfigNeeded
             | SGXQuoteVerifyResult::OutOfDate
             | SGXQuoteVerifyResult::OutOfDateConfigNeeded
@@ -98,7 +102,7 @@ impl SGXQuote {
                     "SGX Quote Verification completed with non-terminal result: {:?}",
                     result
                 );
-                Ok(true)
+                Ok(())
             }
             _ => Err(SGXError::VerifyQuoteFailed(result)),
         }

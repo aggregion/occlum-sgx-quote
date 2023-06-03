@@ -14,13 +14,10 @@ Docs: https://crates.io/crates/occlum-sgx
 use occlum_sgx::SGXQuote;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Generate SGX Quote from report data
     let quote: SGXQuote = [0u8; 64].try_into()?;
-
-    if quote.verify()? {
-        println!("Quote is valid");
-    } else {
-        println!("Quote is invalid");
-    }
+    // Check the quote, it's just for reference
+    quote.verify()?;
 
     let mrenclave = quote.mrenclave();
     let mrsigner = quote.mrsigner();
