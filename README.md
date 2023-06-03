@@ -2,6 +2,12 @@
 
 Implementation for generate and verify SGX DCAP Quote for [Occlum](https://github.com/occlum/occlum)
 
+Docs: https://crates.io/crates/occlum-sgx
+
+# Install
+
+`cargo add occlum-sgx`
+
 # Usage:
 
 ```
