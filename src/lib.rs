@@ -1,10 +1,14 @@
 use std::fmt::Debug;
 use std::mem::size_of;
 
-use error::SgxError;
+#[macro_use]
+extern crate lazy_static;
+
+use error::SGXError;
+use ioctl::IOCTL_CLIENT;
 use types::{
-    SGXConfigId, SGXExtProdId, SGXFamilyId, SGXMeasurement, SGXQuoteHeader, SGXReportBody,
-    SGXReportData,
+    SGXConfigId, SGXExtProdId, SGXFamilyId, SGXMeasurement, SGXQuoteHeader, SGXQuoteVerifyResult,
+    SGXReportBody, SGXReportData,
 };
 
 mod constants;
@@ -12,20 +16,39 @@ mod error;
 mod ioctl;
 mod types;
 
-pub struct SgxQuote<'a> {
+pub struct SGXQuoteBuilder {}
+
+impl SGXQuoteBuilder {
+    pub fn generate_bytes(data: &str) -> Result<Vec<u8>, SGXError> {
+        let result = IOCTL_CLIENT
+            .lock()
+            .unwrap()
+            .generate_quote(SGXReportData::from_str(data))?;
+        Ok(result)
+    }
+}
+
+pub struct SGXQuote<'a> {
     buf: &'a [u8],
     report_body: *const SGXReportBody,
 }
 
-impl<'a> TryFrom<&'a [u8]> for SgxQuote<'a> {
-    type Error = SgxError;
+impl<'a> TryFrom<&'a Vec<u8>> for SGXQuote<'a> {
+    type Error = SGXError;
+    fn try_from(value: &'a Vec<u8>) -> Result<Self, Self::Error> {
+        value.as_slice().try_into()
+    }
+}
+
+impl<'a> TryFrom<&'a [u8]> for SGXQuote<'a> {
+    type Error = SGXError;
 
     fn try_from(buf: &'a [u8]) -> Result<Self, Self::Error> {
         let report_body_offset = size_of::<SGXQuoteHeader>();
         let report_body_size = size_of::<SGXReportBody>();
 
         if buf.len() < report_body_offset + report_body_size {
-            return Err(SgxError::BadQuoteLength {
+            return Err(SGXError::BadQuoteLength {
                 min: buf.len(),
                 actual: report_body_offset + report_body_size,
             });
@@ -38,9 +61,26 @@ impl<'a> TryFrom<&'a [u8]> for SgxQuote<'a> {
     }
 }
 
-impl SgxQuote<'_> {
+impl SGXQuote<'_> {
     pub fn as_slice(&self) -> &[u8] {
         self.buf
+    }
+
+    pub fn verify(&self) -> Result<bool, SGXError> {
+        let result = IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf)?;
+
+        match result {
+            SGXQuoteVerifyResult::Ok => Ok(true),
+            SGXQuoteVerifyResult::ConfigNeeded
+            | SGXQuoteVerifyResult::OutOfDate
+            | SGXQuoteVerifyResult::OutOfDateConfigNeeded
+            | SGXQuoteVerifyResult::SwHardeningNeeded
+            | SGXQuoteVerifyResult::ConfigAndSwHardeningNeeded => {
+                // TODO: add logging here
+                Ok(true)
+            }
+            _ => Err(SGXError::VerifyQuoteFailed(result)),
+        }
     }
 
     pub fn isv_family_id(&self) -> SGXFamilyId {
@@ -76,9 +116,9 @@ impl SgxQuote<'_> {
     }
 }
 
-impl Debug for SgxQuote<'_> {
+impl Debug for SGXQuote<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SgxQuote")
+        f.debug_struct("SGXQuote")
             .field("mrenclave", &self.mrenclave())
             .field("mrsigner", &self.mrsigner())
             .field("report_body", &self.report_data())

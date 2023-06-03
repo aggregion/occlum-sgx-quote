@@ -135,7 +135,7 @@ pub struct SGXReportBody {
 }
 
 #[derive(Debug)]
-pub enum SgxQuoteVerifyResult {
+pub enum SGXQuoteVerifyResult {
     Ok = 0x0000_0000,
     ConfigNeeded = 0x0000_A001,
     OutOfDate = 0x0000_A002,
