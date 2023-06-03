@@ -4,6 +4,7 @@ use crate::types::SGXQuoteVerifyResult;
 
 #[derive(Debug)]
 pub enum SGXError {
+    DeviceOpenFailed(&'static str),
     BadQuoteLength {
         min: usize,
         actual: usize,
@@ -26,6 +27,9 @@ impl Display for SGXError {
             }
             SGXError::VerifyQuoteFailed(result) => {
                 write!(f, "Quote verification failed: {:?}", result)
+            }
+            SGXError::DeviceOpenFailed(path) => {
+                write!(f, "Failed to open {}", path)
             }
         }
     }

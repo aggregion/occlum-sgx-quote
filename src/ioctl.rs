@@ -37,33 +37,41 @@ lazy_static! {
 }
 
 pub struct IoctlClient {
-    fd: i32,
+    fd: Option<i32>,
     quote_size: Option<u32>,
     supplemental_size: Option<u32>,
 }
 
 impl IoctlClient {
     fn new() -> Self {
-        let path = CString::new("/dev/sgx").expect("CString::new failed");
-        let fd = unsafe { libc::open(path.as_ptr(), libc::O_RDONLY) };
-
-        if fd <= 0 {
-            panic!("Open /dev/sgx failed");
-        }
-
         Self {
-            fd,
+            fd: None,
             quote_size: None,
             supplemental_size: None,
         }
     }
 
-    fn get_quote_size(&mut self) -> Result<u32, SGXError> {
-        let size: u32 = 0;
+    fn fd(&mut self) -> Result<i32, SGXError> {
+        if self.fd.is_none() {
+            let path = CString::new("/dev/sgx").expect("CString::new failed");
+            let fd = unsafe { libc::open(path.as_ptr(), libc::O_RDONLY) };
 
+            if fd <= 0 {
+                return Err(SGXError::DeviceOpenFailed("/dev/sgx"));
+            }
+
+            self.fd = Some(fd);
+            Ok(fd)
+        } else {
+            Ok(self.fd.as_ref().unwrap().clone())
+        }
+    }
+
+    fn get_quote_size(&mut self) -> Result<u32, SGXError> {
         if self.quote_size.is_none() {
+            let size: u32 = 0;
             trace!("ioctl(SGX_IOCTL_GET_DCAP_QUOTE_SIZE): Get DCAP Quote size");
-            let ret = unsafe { libc::ioctl(self.fd, IOCTL_GET_DCAP_QUOTE_SIZE, &size) };
+            let ret = unsafe { libc::ioctl(self.fd()?, IOCTL_GET_DCAP_QUOTE_SIZE, &size) };
 
             if ret < 0 {
                 return Err(SGXError::IoctlClientError {
@@ -75,7 +83,7 @@ impl IoctlClient {
             self.quote_size = Some(size);
         }
 
-        Ok(size)
+        Ok(self.quote_size.as_ref().unwrap().clone())
     }
 
     pub fn generate_quote(&mut self, report_data: SGXReportData) -> Result<Vec<u8>, SGXError> {
@@ -88,7 +96,8 @@ impl IoctlClient {
             quote_buf: quote_buf.as_mut_ptr(),
         };
 
-        let ret = unsafe { libc::ioctl(self.fd, IOCTL_GEN_DCAP_QUOTE, &quote_arg) };
+        trace!("ioctl(IOCTL_GEN_DCAP_QUOTE): Generate SGX DCAP Quote");
+        let ret = unsafe { libc::ioctl(self.fd()?, IOCTL_GEN_DCAP_QUOTE, &quote_arg) };
         if ret < 0 {
             return Err(SGXError::IoctlClientError {
                 request_type: "IOCTL_GEN_DCAP_QUOTE",
@@ -99,10 +108,10 @@ impl IoctlClient {
     }
 
     fn get_supplemental_size(&mut self) -> Result<u32, SGXError> {
-        let size: u32 = 0;
-
         if self.supplemental_size.is_none() {
-            let ret = unsafe { libc::ioctl(self.fd, IOCTL_GET_DCAP_SUPPLEMENTAL_SIZE, &size) };
+            let size: u32 = 0;
+            trace!("ioctl(IOCTL_GET_DCAP_SUPPLEMENTAL_SIZE): Get Supplemental size");
+            let ret = unsafe { libc::ioctl(self.fd()?, IOCTL_GET_DCAP_SUPPLEMENTAL_SIZE, &size) };
 
             if ret < 0 {
                 return Err(SGXError::IoctlClientError {
@@ -114,7 +123,7 @@ impl IoctlClient {
             self.supplemental_size = Some(size);
         }
 
-        Ok(size)
+        Ok(self.supplemental_size.as_ref().unwrap().clone())
     }
 
     pub fn verify_quote(&mut self, quote_buf: &[u8]) -> Result<SGXQuoteVerifyResult, SGXError> {
@@ -132,7 +141,8 @@ impl IoctlClient {
             supplemental_data: suppl_buf.as_mut_ptr(),
         };
 
-        let ret = unsafe { libc::ioctl(self.fd, IOCTL_VER_DCAP_QUOTE, &verify_arg) };
+        trace!("ioctl(IOCTL_VER_DCAP_QUOTE): Verify SGX DCAP Quote");
+        let ret = unsafe { libc::ioctl(self.fd()?, IOCTL_VER_DCAP_QUOTE, &verify_arg) };
         if ret < 0 {
             return Err(SGXError::IoctlClientError {
                 request_type: "IOCTL_VER_DCAP_QUOTE",
@@ -146,29 +156,9 @@ impl IoctlClient {
 impl Drop for IoctlClient {
     fn drop(&mut self) {
         unsafe {
-            libc::close(self.fd);
+            if let Some(fd) = self.fd {
+                libc::close(fd);
+            }
         }
     }
 }
-
-// fn verify_sgx_quote(quote: SGXQuote) -> Result<SGXQuoteVerifyResult, SGXError> {
-//     let quote_buf = quote.as_slice();
-
-//     let mut quote_verification_result = SGXQuoteVerifyResult::Unspecified;
-//     let mut status = 1;
-//     let mut suppl_buf: Vec<u8> = vec![0; supplemental_size as usize];
-
-//     let verify_arg = IoctlVerDCAPQuoteArg {
-//         quote_buf: quote_buf.as_mut_ptr(),
-//         quote_size: quote_buf.len() as u32,
-//         collateral_expiration_status: &mut status,
-//         quote_verification_result: &mut quote_verification_result,
-//         supplemental_data_size: supplemental_size,
-//         supplemental_data: suppl_buf.as_mut_ptr(),
-//     };
-
-// let ret = unsafe { libc::ioctl(fd, IOCTL_VER_DCAP_QUOTE, &verify_arg) };
-// if ret < 0 {
-//     panic!("IOCTRL IOCTL_VER_DCAP_QUOTE failed")
-// }
-// }
