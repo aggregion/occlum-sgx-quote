@@ -1,5 +1,7 @@
 use std::{ffi::CString, sync::Mutex};
 
+use log::trace;
+
 use crate::{
     constants::{
         IOCTL_GEN_DCAP_QUOTE, IOCTL_GET_DCAP_QUOTE_SIZE, IOCTL_GET_DCAP_SUPPLEMENTAL_SIZE,
@@ -60,6 +62,7 @@ impl IoctlClient {
         let size: u32 = 0;
 
         if self.quote_size.is_none() {
+            trace!("ioctl(SGX_IOCTL_GET_DCAP_QUOTE_SIZE): Get DCAP Quote size");
             let ret = unsafe { libc::ioctl(self.fd, IOCTL_GET_DCAP_QUOTE_SIZE, &size) };
 
             if ret < 0 {

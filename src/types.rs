@@ -1,6 +1,6 @@
 use base64::{engine::general_purpose::STANDARD_NO_PAD as base64, Engine};
-use std::fmt::Debug;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
+use std::ops::Deref;
 
 use crate::constants::{
     SGX_CONFIGID_SIZE, SGX_CPUSVN_SIZE, SGX_HASH_SIZE, SGX_REPORT_BODY_RESERVED1_BYTES,
@@ -8,19 +8,17 @@ use crate::constants::{
     SGX_REPORT_BODY_RESERVED4_BYTES, SGX_REPORT_DATA_SIZE,
 };
 
+pub type ReportData = [u8; SGX_REPORT_DATA_SIZE];
+
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct SGXReportData {
-    pub d: [u8; SGX_REPORT_DATA_SIZE],
+    pub d: ReportData,
 }
 
 impl SGXReportData {
-    pub fn from_str(s: &str) -> Self {
-        let mut report = Self::default();
-        for (pos, val) in s.as_bytes().iter().enumerate() {
-            report.d[pos] = *val;
-        }
-        report
+    pub fn new(s: ReportData) -> Self {
+        Self { d: s }
     }
 }
 
@@ -60,21 +58,37 @@ pub struct SGXAttributes {
     pub xfrm: u64,
 }
 
+type SGXHash = [u8; SGX_HASH_SIZE];
+
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct SGXMeasurement {
-    pub m: [u8; SGX_HASH_SIZE],
+    pub measurement: SGXHash,
+}
+
+impl SGXMeasurement {
+    pub fn new(measurement: SGXHash) -> Self {
+        Self { measurement }
+    }
+}
+
+impl Deref for SGXMeasurement {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.measurement.as_ref()
+    }
 }
 
 impl Display for SGXMeasurement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", hex::encode(self.m))
+        write!(f, "{}", hex::encode(self.measurement))
     }
 }
 
 impl Debug for SGXMeasurement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "\"{}\"", hex::encode(self.m))
+        write!(f, "\"{}\"", hex::encode(self.measurement))
     }
 }
 
