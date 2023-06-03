@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::mem::size_of;
 
-use error::OcclumSgxError;
+use error::SgxError;
 use types::{
     SGXConfigId, SGXExtProdId, SGXFamilyId, SGXMeasurement, SGXQuoteHeader, SGXReportBody,
     SGXReportData,
@@ -18,14 +18,14 @@ pub struct SgxQuote<'a> {
 }
 
 impl<'a> TryFrom<&'a [u8]> for SgxQuote<'a> {
-    type Error = OcclumSgxError;
+    type Error = SgxError;
 
     fn try_from(buf: &'a [u8]) -> Result<Self, Self::Error> {
         let report_body_offset = size_of::<SGXQuoteHeader>();
         let report_body_size = size_of::<SGXReportBody>();
 
         if buf.len() < report_body_offset + report_body_size {
-            return Err(OcclumSgxError::BadQuoteLength {
+            return Err(SgxError::BadQuoteLength {
                 min: buf.len(),
                 actual: report_body_offset + report_body_size,
             });
