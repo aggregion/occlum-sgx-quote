@@ -1,4 +1,4 @@
-# Occlum SGX lib
+# Occlum SGX Lib
 
 Implementation for generate and verify SGX DCAP Quote for [Occlum](https://github.com/occlum/occlum)
 

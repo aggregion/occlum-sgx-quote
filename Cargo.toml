@@ -1,12 +1,12 @@
 [package]
 name = "occlum-sgx"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 authors = ["Ivan Chirkin <chirkin.ivan@gmail.com>"]
 description = "Lib for generate and verify DCAP SGX Report received from Occlum"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/aggregion/occlum-sgx"
-
+exclude = ["tests/fixtures/*"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]

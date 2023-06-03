@@ -5,7 +5,7 @@ use std::ops::Deref;
 #[macro_use]
 extern crate lazy_static;
 
-use error::SGXError;
+pub use error::SGXError;
 use ioctl::IOCTL_CLIENT;
 use log::warn;
 pub use types::*;
