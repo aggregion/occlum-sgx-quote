@@ -51,7 +51,7 @@ impl TryFrom<ReportData> for SGXQuote {
     type Error = SGXError;
 
     fn try_from(value: ReportData) -> Result<Self, Self::Error> {
-        Self::generate(&value)
+        Self::from_report_data(&value)
     }
 }
 
@@ -64,7 +64,7 @@ impl Deref for SGXQuote {
 }
 
 impl SGXQuote {
-    pub fn generate(data: &ReportData) -> Result<Self, SGXError> {
+    pub fn from_report_data(data: &ReportData) -> Result<Self, SGXError> {
         let result = IOCTL_CLIENT
             .lock()
             .unwrap()
@@ -72,15 +72,20 @@ impl SGXQuote {
         Ok(result.try_into()?)
     }
 
+    pub fn from_slice(slice: &[u8]) -> Result<Self, SGXError> {
+        slice.try_into()
+    }
+
     pub fn as_slice(&self) -> &[u8] {
         &*self
     }
 
+    pub fn verify_result(&self) -> Result<SGXQuoteVerifyResult, SGXError> {
+        IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf.as_ref())
+    }
+
     pub fn verify(&self) -> Result<bool, SGXError> {
-        let result = IOCTL_CLIENT
-            .lock()
-            .unwrap()
-            .verify_quote(self.buf.as_ref())?;
+        let result = self.verify_result()?;
 
         match result {
             SGXQuoteVerifyResult::Ok => Ok(true),

@@ -7,32 +7,41 @@ use crate::constants::{
     SGX_REPORT_BODY_RESERVED2_BYTES, SGX_REPORT_BODY_RESERVED3_BYTES,
     SGX_REPORT_BODY_RESERVED4_BYTES, SGX_REPORT_DATA_SIZE,
 };
+use crate::error::SGXError;
 
 pub type ReportData = [u8; SGX_REPORT_DATA_SIZE];
 
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct SGXReportData {
-    pub d: ReportData,
+    pub data: ReportData,
 }
 
 impl SGXReportData {
-    pub fn new(s: ReportData) -> Self {
-        Self { d: s }
+    pub fn new(data: ReportData) -> Self {
+        Self { data }
+    }
+}
+
+impl Deref for SGXReportData {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.data.as_ref()
     }
 }
 
 impl Default for SGXReportData {
     fn default() -> Self {
         Self {
-            d: [0u8; SGX_REPORT_DATA_SIZE],
+            data: [0u8; SGX_REPORT_DATA_SIZE],
         }
     }
 }
 
 impl Debug for SGXReportData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "\"{}\"", base64.encode(self.d))
+        write!(f, "\"{}\"", base64.encode(self.data))
     }
 }
 
@@ -69,6 +78,19 @@ pub struct SGXMeasurement {
 impl SGXMeasurement {
     pub fn new(measurement: SGXHash) -> Self {
         Self { measurement }
+    }
+
+    pub fn from_hex(s: &str) -> Result<Self, SGXError> {
+        let measurement: SGXHash = hex::decode(s)
+            .map_err(|e| SGXError::SGXMeasurementParseError(e.to_string()))?
+            .try_into()
+            .map_err(|x: Vec<u8>| {
+                SGXError::SGXMeasurementParseError(format!(
+                    "Bad length, required 32 bytes, received: {}",
+                    x.len()
+                ))
+            })?;
+        Ok(Self { measurement })
     }
 }
 

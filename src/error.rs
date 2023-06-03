@@ -1,6 +1,5 @@
-use std::{error, fmt::Display};
-
 use crate::types::SGXQuoteVerifyResult;
+use std::{error, fmt::Display};
 
 #[derive(Debug)]
 pub enum SGXError {
@@ -13,6 +12,7 @@ pub enum SGXError {
         request_type: &'static str,
         ret: i32,
     },
+    SGXMeasurementParseError(String),
     VerifyQuoteFailed(SGXQuoteVerifyResult),
 }
 
@@ -30,6 +30,9 @@ impl Display for SGXError {
             }
             SGXError::DeviceOpenFailed(path) => {
                 write!(f, "Failed to open {}", path)
+            }
+            SGXError::SGXMeasurementParseError(msg) => {
+                write!(f, "Failed to parse SGX measurement: {}", msg)
             }
         }
     }
