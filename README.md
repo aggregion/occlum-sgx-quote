@@ -1,13 +1,9 @@
 # Occlum SGX Lib
-
 Implementation for generating and verifying SGX DCAP quotes for [Occlum](https://github.com/occlum/occlum)
-
 Docs: https://docs.rs/occlum-sgx/
 
 # Install
-
 `cargo add occlum-sgx`
-
 
 # Requirements
 - SGX Server
@@ -15,7 +11,7 @@ Docs: https://docs.rs/occlum-sgx/
 - The app should be run as an [occlum instance](https://occlum.readthedocs.io/en/latest/quickstart.html) in HW sgx mode
 - Occlum's configuration should contain mount devfs.
 
-# Usage:
+# Usage
 
 ```rust
 use occlum_sgx::SGXQuote;

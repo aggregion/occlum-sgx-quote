@@ -3,22 +3,22 @@
 //!
 //! RFC: <https://download.01.org/intel-sgx/sgx-dcap/1.16/linux/docs/Intel_SGX_ECDSA_QuoteLibReference_DCAP_API.pdf>
 //!
-//! # Generate SGXQuote
+//! # Generate [`SGXQuote`]
 //! ```rust ignore
 //! use occlum_sgx::SGXQuote;
 //! let quote: SGXQuote = [0u8; 64].try_into().unwrap();
 //! // or
 //! let quote = SGXQuote::from_report_data(&[0u8; 64]).unwrap();
+//! // convert to &[u8] and send to remote for verification
+//! let quote_buf = quote.as_slice();
 //! ```
 //!
-//! # Restore [`SGXQuote`] from `&[u8]`
+//! # Verify [`SGXQuote`] on remote
 //! ```rust ignore
+//! use occlum_sgx::SGXQuote;
 //! let quote_buf: &[u8] = ...;
 //! let quote = SGXQuote::from_slice(quote_buf).unwrap();
-//! ```
-//!
-//! # Verify [`SGXQuote`]
-//! ```rust ignore
+//! // verify quote
 //! quote.verify().unwrap();
 //! ```
 //!
