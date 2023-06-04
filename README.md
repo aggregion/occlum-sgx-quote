@@ -17,7 +17,7 @@ Docs: https://docs.rs/occlum-sgx/
 
 # Usage:
 
-```
+```rust
 use occlum_sgx::SGXQuote;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
