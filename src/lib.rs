@@ -1,3 +1,24 @@
+/// Generate and verify SGX Quote with [Occlum] DCAP
+///
+/// # Generate SGXQuote
+/// ```rust
+/// let quote: SGXQuote = [0u8; 64].try_into().unwrap();
+/// // or
+/// let quote = SGXQuote::from_report_data(&[0u8; 64]).unwrap();
+/// ```
+///
+/// # Restore SGXQuote from &[u8]
+/// ```rust ignore
+/// let quote_buf: &[u8] = ...;
+/// let quote = SGXQuote::from_slice(quote_buf).unwrap();
+/// ```
+///
+/// # Verify SGXQuote
+/// ```rust
+/// quote.verify().unwrap();
+/// ```
+///
+/// [Occlum]: https://github.com/occlum/occlum
 use std::fmt::Debug;
 use std::mem::size_of;
 use std::ops::Deref;
