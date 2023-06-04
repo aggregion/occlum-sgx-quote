@@ -20,6 +20,9 @@
 //! let quote = SGXQuote::from_slice(quote_buf).unwrap();
 //! // verify quote
 //! quote.verify().unwrap();
+//! // check report data
+//! assert_eq!(quote.report_data(), &[0u8; 64]);
+//! // and check measurement data if required
 //! ```
 //!
 //! [Occlum]: https://github.com/occlum/occlum

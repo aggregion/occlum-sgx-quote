@@ -3,7 +3,16 @@ Implementation for generating and verifying SGX DCAP quotes for [Occlum](https:/
 Docs: https://docs.rs/occlum-sgx/
 
 # Install
-`cargo add occlum-sgx`
+
+Run the following Cargo command in your project directory:
+
+```bash
+cargo add occlum-sgx
+```
+Or add the following line to your Cargo.toml:
+```
+occlum-sgx = "0.1.11"
+```
 
 # Requirements
 - SGX Server
