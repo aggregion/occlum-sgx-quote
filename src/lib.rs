@@ -1,20 +1,21 @@
 //! Generate and verify [`SGXQuote`] with [Occlum] DCAP
 //!
 //! # Generate SGXQuote
-//! ```rust
+//! ```rust ignore
+//! use occlum_sgx::SGXQuote;
 //! let quote: SGXQuote = [0u8; 64].try_into().unwrap();
 //! // or
 //! let quote = SGXQuote::from_report_data(&[0u8; 64]).unwrap();
 //! ```
 //!
 //! # Restore [`SGXQuote`] from `&[u8]`
-//! ```rust
+//! ```rust ignore
 //! let quote_buf: &[u8] = ...;
 //! let quote = SGXQuote::from_slice(quote_buf).unwrap();
 //! ```
 //!
 //! # Verify [`SGXQuote`]
-//! ```rust
+//! ```rust ignore
 //! quote.verify().unwrap();
 //! ```
 //!
@@ -36,6 +37,7 @@ mod error;
 mod ioctl;
 mod types;
 
+/// SGX Quote
 pub struct SGXQuote {
     buf: Vec<u8>,
     report_body: *const SGXReportBody,
@@ -88,7 +90,7 @@ impl SGXQuote {
     /// Create a new [SGXQuote] from [ReportData], it needs to be run on the SGX server in an [Occlum] instance, also requires [PCCS].
     ///
     /// # Example
-    /// ```rust
+    /// ```rust ignore
     /// let quote = SGXQuote::from_report_data(&value).unwrap();
     /// ```
     ///
@@ -98,14 +100,15 @@ impl SGXQuote {
         let result = IOCTL_CLIENT
             .lock()
             .unwrap()
-            .generate_quote(SGXReportData::new(data.clone()))?;
-        Ok(result.try_into()?)
+            .generate_quote(SGXReportData::new(*data))?;
+        result.try_into()
     }
 
     /// Restore SGXQuote from slice of bytes.
     /// # Example
     /// ```rust
-    /// let quote_buf: &[u8] = ...;
+    /// use occlum_sgx::SGXQuote;
+    /// let quote_buf: &[u8] = &[0u8; 4356];
     /// let quote = SGXQuote::from_slice(quote_buf).unwrap();
     /// ```
     pub fn from_slice(slice: &[u8]) -> Result<Self, SGXError> {
@@ -113,13 +116,13 @@ impl SGXQuote {
     }
 
     pub fn as_slice(&self) -> &[u8] {
-        &*self
+        self
     }
 
     /// Verify [`SGXQuote`] and return [`SGXQuoteVerifyResult`]
     ///
     /// # Example
-    /// ```rust
+    /// ```rust ignore
     /// let status = quote.verify().unwrap();
     /// match status {
     ///     SGXQuoteVerifyResult::Ok => println!("SGX Quote verified"),
@@ -140,7 +143,7 @@ impl SGXQuote {
         IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf.as_ref())
     }
 
-    /// Verify SGXQuote, if it is not valid, return error
+    /// Verify SGXQuote, if it is not valid, return error [`SGXError::VerifyQuoteFailed`]
     pub fn verify(&self) -> Result<(), SGXError> {
         let result = self.verify_result()?;
 

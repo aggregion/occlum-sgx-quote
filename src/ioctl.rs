@@ -65,7 +65,7 @@ impl IoctlClient {
             self.fd = Some(fd);
             Ok(fd)
         } else {
-            Ok(self.fd.as_ref().unwrap().clone())
+            Ok(*self.fd.as_ref().unwrap())
         }
     }
 
@@ -85,7 +85,7 @@ impl IoctlClient {
             self.quote_size = Some(size);
         }
 
-        Ok(self.quote_size.as_ref().unwrap().clone())
+        Ok(*self.quote_size.as_ref().unwrap())
     }
 
     pub fn generate_quote(&mut self, report_data: SGXReportData) -> Result<Vec<u8>, SGXError> {
@@ -125,7 +125,7 @@ impl IoctlClient {
             self.supplemental_size = Some(size);
         }
 
-        Ok(self.supplemental_size.as_ref().unwrap().clone())
+        Ok(*self.supplemental_size.as_ref().unwrap())
     }
 
     pub fn verify_quote(&mut self, quote_buf: &[u8]) -> Result<SGXQuoteVerifyResult, SGXError> {
