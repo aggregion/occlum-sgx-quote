@@ -12,7 +12,7 @@ Docs: https://docs.rs/occlum-sgx/
 # Requirements
 - SGX Server
 - [PCCS](https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteGeneration/pccs/README.md)
-- The app should be run as an [occlum instance](https://occlum.readthedocs.io/en/latest/quickstart.html)
+- The app should be run as an [occlum instance](https://occlum.readthedocs.io/en/latest/quickstart.html) in HW sgx mode
 - Occlum's configuration should contain mount devfs.
 
 # Usage:

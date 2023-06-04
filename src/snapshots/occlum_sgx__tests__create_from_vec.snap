@@ -1,0 +1,6 @@
+---
+source: src/lib.rs
+expression: "format!(\"{:?}\", quote)"
+---
+"SGXQuote { mrenclave: \"9c90fd81f6e9fe64b46b14f0623523a52d6a5678482988c408f6adffe6301e2c\", mrsigner: \"6d5ead54bfbe9494e1cd9042bb7c25d74c597d4700e332b1b3168a60712c1e02\", report_body: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\", product_id: 4000, version: 5000, family_id: FamilyId { low: \"0x2534\", high: \"0x3423\" }, ext_prod_id: ExtProdId { low: \"0x423452\", high: \"0x35432\" }, config_id: \"VaHUbdxENJhdwquCHHYG+ytUrqVPeVkj7z/qDjo30lRDmrH9riiZ+1UYmk8cPPZzjn295KVejyt19iBWH7VDow\" }"
+

@@ -195,8 +195,11 @@ pub enum SGXQuoteVerifyResult {
     /// Applying both the updated patches and the appropriate platform configuration changes
     /// will produce an SGX_QL_QV_RESULT_OK verification result.
     OutOfDateConfigNeeded = 0x0000_A003,
+    /// # Terminal
     InvalidSignature = 0x0000_A004,
+    /// # Terminal
     Revoked = 0x0000_A005,
+    /// # Terminal
     Unspecified = 0x0000_A006,
     /// # Not terminal
     /// The SGX platform firmware and SW

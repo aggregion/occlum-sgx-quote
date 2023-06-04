@@ -54,8 +54,8 @@ impl TryFrom<Vec<u8>> for SGXQuote {
 
         if buf.len() < report_body_offset + report_body_size {
             return Err(SGXError::BadQuoteLength {
-                min: buf.len(),
-                actual: report_body_offset + report_body_size,
+                min: report_body_offset + report_body_size,
+                actual: buf.len(),
             });
         }
 
@@ -214,5 +214,18 @@ impl Debug for SGXQuote {
             .field("ext_prod_id", &self.isv_ext_prod_id())
             .field("config_id", &self.config_id())
             .finish()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn create_from_vec() {
+        let quote_buf = include_bytes!("../tests/fixtures/quote.raw");
+        let quote = SGXQuote::from_slice(quote_buf.as_slice()).unwrap();
+
+        insta::assert_yaml_snapshot!(format!("{:?}", quote));
     }
 }
