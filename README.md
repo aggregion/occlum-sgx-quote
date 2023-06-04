@@ -1,6 +1,6 @@
 # Occlum SGX Lib
 
-Implementation for generating and verifying SGX DCAP quotes for [Occlum] (https://github.com/occlum/occlum)
+Implementation for generating and verifying SGX DCAP quotes for [Occlum](https://github.com/occlum/occlum)
 
 Docs: https://docs.rs/occlum-sgx/
 
