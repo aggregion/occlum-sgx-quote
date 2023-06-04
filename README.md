@@ -1,6 +1,6 @@
 # Occlum SGX Lib
 
-Implementation for generate and verify SGX DCAP Quote for [Occlum](https://github.com/occlum/occlum)
+Implementation for generating and verifying SGX DCAP quotes for [Occlum] (https://github.com/occlum/occlum)
 
 Docs: https://docs.rs/occlum-sgx/
 
@@ -10,11 +10,10 @@ Docs: https://docs.rs/occlum-sgx/
 
 
 # Requirements
-
 - SGX Server
 - [PCCS](https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteGeneration/pccs/README.md)
-- App should be runs as [occlum instance](https://occlum.readthedocs.io/en/latest/quickstart.html)
-- Occlum config should contain mount devfs
+- The app should be run as an [occlum instance](https://occlum.readthedocs.io/en/latest/quickstart.html)
+- Occlum's configuration should contain mount devfs.
 
 # Usage:
 
