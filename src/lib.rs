@@ -1,24 +1,24 @@
-/// Generate and verify SGX Quote with [Occlum] DCAP
-///
-/// # Generate SGXQuote
-/// ```rust
-/// let quote: SGXQuote = [0u8; 64].try_into().unwrap();
-/// // or
-/// let quote = SGXQuote::from_report_data(&[0u8; 64]).unwrap();
-/// ```
-///
-/// # Restore SGXQuote from &[u8]
-/// ```rust ignore
-/// let quote_buf: &[u8] = ...;
-/// let quote = SGXQuote::from_slice(quote_buf).unwrap();
-/// ```
-///
-/// # Verify SGXQuote
-/// ```rust
-/// quote.verify().unwrap();
-/// ```
-///
-/// [Occlum]: https://github.com/occlum/occlum
+//! Generate and verify [`SGXQuote`] with [Occlum] DCAP
+//!
+//! # Generate SGXQuote
+//! ```rust
+//! let quote: SGXQuote = [0u8; 64].try_into().unwrap();
+//! // or
+//! let quote = SGXQuote::from_report_data(&[0u8; 64]).unwrap();
+//! ```
+//!
+//! # Restore [`SGXQuote`] from `&[u8]`
+//! ```rust
+//! let quote_buf: &[u8] = ...;
+//! let quote = SGXQuote::from_slice(quote_buf).unwrap();
+//! ```
+//!
+//! # Verify [`SGXQuote`]
+//! ```rust
+//! quote.verify().unwrap();
+//! ```
+//!
+//! [Occlum]: https://github.com/occlum/occlum
 use std::fmt::Debug;
 use std::mem::size_of;
 use std::ops::Deref;
@@ -85,7 +85,15 @@ impl Deref for SGXQuote {
 }
 
 impl SGXQuote {
-    // Create a new SGXQuote from ReportData, it needs to be run on the SGX server in an Occlum instance (requires PCCS).
+    /// Create a new [SGXQuote] from [ReportData], it needs to be run on the SGX server in an [Occlum] instance, also requires [PCCS].
+    ///
+    /// # Example
+    /// ```rust
+    /// let quote = SGXQuote::from_report_data(&value).unwrap();
+    /// ```
+    ///
+    /// [Occlum]: https://github.com/occlum/occlum
+    /// [PCCS]: https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteGeneration/pccs/README.md
     pub fn from_report_data(data: &ReportData) -> Result<Self, SGXError> {
         let result = IOCTL_CLIENT
             .lock()
@@ -94,7 +102,12 @@ impl SGXQuote {
         Ok(result.try_into()?)
     }
 
-    // Restore SGXQuote from slice of bytes.
+    /// Restore SGXQuote from slice of bytes.
+    /// # Example
+    /// ```rust
+    /// let quote_buf: &[u8] = ...;
+    /// let quote = SGXQuote::from_slice(quote_buf).unwrap();
+    /// ```
     pub fn from_slice(slice: &[u8]) -> Result<Self, SGXError> {
         slice.try_into()
     }
@@ -103,12 +116,31 @@ impl SGXQuote {
         &*self
     }
 
-    // Verify SGXQuote and return status
+    /// Verify [`SGXQuote`] and return [`SGXQuoteVerifyResult`]
+    ///
+    /// # Example
+    /// ```rust
+    /// let status = quote.verify().unwrap();
+    /// match status {
+    ///     SGXQuoteVerifyResult::Ok => println!("SGX Quote verified"),
+    ///     SGXQuoteVerifyResult::ConfigNeeded
+    ///     | SGXQuoteVerifyResult::OutOfDate
+    ///     | SGXQuoteVerifyResult::OutOfDateConfigNeeded
+    ///     | SGXQuoteVerifyResult::SwHardeningNeeded
+    ///     | SGXQuoteVerifyResult::ConfigAndSwHardeningNeeded => {
+    ///         println!(
+    ///             "SGX Quote Verification completed with non-terminal result: {:?}",
+    ///             result
+    ///         )
+    ///     }
+    ///     _ => println!("SGX Quote Verification failed"),
+    /// }
+    /// ```
     pub fn verify_result(&self) -> Result<SGXQuoteVerifyResult, SGXError> {
         IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf.as_ref())
     }
 
-    // Verify SGXQuote, if it is not valid, return error
+    /// Verify SGXQuote, if it is not valid, return error
     pub fn verify(&self) -> Result<(), SGXError> {
         let result = self.verify_result()?;
 

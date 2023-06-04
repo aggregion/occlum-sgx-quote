@@ -8,6 +8,14 @@ Docs: https://docs.rs/occlum-sgx/
 
 `cargo add occlum-sgx`
 
+
+# Requirements
+
+- SGX Server
+- [PCCS](https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteGeneration/pccs/README.md)
+- App should be runs as [occlum instance](https://occlum.readthedocs.io/en/latest/quickstart.html)
+- Occlum config should contain mount devfs
+
 # Usage:
 
 ```
