@@ -1,4 +1,7 @@
+#![doc(issue_tracker_base_url = "https://github.com/aggregion/occlum-sgx/issues")]
 //! Generate and verify [`SGXQuote`] with [Occlum] DCAP
+//!
+//! RFC: <https://download.01.org/intel-sgx/sgx-dcap/1.16/linux/docs/Intel_SGX_ECDSA_QuoteLibReference_DCAP_API.pdf>
 //!
 //! # Generate SGXQuote
 //! ```rust ignore
@@ -143,7 +146,9 @@ impl SGXQuote {
         IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf.as_ref())
     }
 
-    /// Verify SGXQuote, if it is not valid, return error [`SGXError::VerifyQuoteFailed`]
+    /// Verify [SGXQuote], if it is not valid, return error [`SGXError::VerifyQuoteFailed`]
+    ///
+    /// See also [`SGXQuote::verify_result`]
     pub fn verify(&self) -> Result<(), SGXError> {
         let result = self.verify_result()?;
 

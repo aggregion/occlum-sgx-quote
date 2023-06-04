@@ -14,7 +14,7 @@ pub type ReportData = [u8; SGX_REPORT_DATA_SIZE];
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct SGXReportData {
-    pub data: ReportData,
+    data: ReportData,
 }
 
 impl SGXReportData {
@@ -72,7 +72,7 @@ type SGXHash = [u8; SGX_HASH_SIZE];
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SGXMeasurement {
-    pub measurement: SGXHash,
+    measurement: SGXHash,
 }
 
 impl SGXMeasurement {
@@ -173,13 +173,46 @@ pub struct SGXReportBody {
 #[derive(Debug)]
 pub enum SGXQuoteVerifyResult {
     Ok = 0x0000_0000,
+    ///#  Not terminal
+    /// The SGX platform firmware and SW are at
+    /// the latest security patching level but there are platform hardware configurations that
+    /// may expose the enclave to vulnerabilities. These vulnerabilities can be mitigated with
+    /// the appropriate platform configuration changes that will produce an
+    /// [`SGXQuoteVerifyResult::Ok`] verification result.
     ConfigNeeded = 0x0000_A001,
+    /// # Not terminal
+    /// The SGX platform firmware and SW are not at
+    /// the latest security patching level. The platform needs to be patched with firmware
+    /// and/or software patches in order to produce an [`SGXQuoteVerifyResult::Ok`] verification
+    /// result.
     OutOfDate = 0x0000_A002,
+    /// # Not terminal
+    /// The SGX platform firmware
+    /// and SW are not at the latest security patching level. The platform needs to be patched
+    /// with firmware and/or software patches. There are also platform hardware
+    /// configurations that may expose the enclave to vulnerabilities. These configuration
+    /// vulnerabilities can be mitigated with the appropriate platform configuration changes.
+    /// Applying both the updated patches and the appropriate platform configuration changes
+    /// will produce an SGX_QL_QV_RESULT_OK verification result.
     OutOfDateConfigNeeded = 0x0000_A003,
     InvalidSignature = 0x0000_A004,
     Revoked = 0x0000_A005,
     Unspecified = 0x0000_A006,
+    /// # Not terminal
+    /// The SGX platform firmware and SW
+    /// are at the latest security patching level but there are certain vulnerabilities that can only
+    /// be mitigated with software mitigations implemented by the enclave. The enclave
+    /// identity policy needs to indicate whether the enclave has implemented these
+    /// mitigations.
     SwHardeningNeeded = 0x0000_A007,
+    /// # Not terminal
+    /// The SGX platform firmware and SW are at the latest security patching level but there are certain
+    /// vulnerabilities that can only be mitigated with software mitigations implemented by the
+    /// enclave. The enclave identity policy needs to indicate whether the enclave has
+    /// implemented these mitigations. There are also platform hardware configurations that
+    /// may expose the enclave to vulnerabilities. These configuration vulnerabilities can be
+    /// mitigated with the appropriate platform configuration changes that will produce an
+    /// [`SGXQuoteVerifyResult::SwHardeningNeeded`] verification result.
     ConfigAndSwHardeningNeeded = 0x0000_A008,
     Max = 0x0000_A0FF,
 }
