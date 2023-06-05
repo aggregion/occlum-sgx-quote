@@ -12,7 +12,7 @@ cargo add occlum-sgx
 ```
 Or add the following line to your Cargo.toml:
 ```
-occlum-sgx = "0.1.11"
+occlum-sgx = "0.1"
 ```
 
 # Requirements
