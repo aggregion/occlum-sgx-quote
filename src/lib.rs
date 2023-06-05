@@ -23,6 +23,11 @@
 //! // check report data
 //! assert_eq!(quote.report_data(), &[0u8; 64]);
 //! // and check measurement data if required
+//! assert_eq!(
+//!     quote.mrsigner(),
+//!     SGXMeasurement::from_hex("538c416a279b18e54f719d6332af1bc95082d4ef79153fb8c6a31ef70957d82b").unwrap()
+//! );
+//! ...
 //! ```
 //!
 //! [Occlum]: https://github.com/occlum/occlum

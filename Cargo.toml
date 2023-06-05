@@ -1,6 +1,6 @@
 [package]
 name = "occlum-sgx"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2021"
 authors = ["Ivan Chirkin <chirkin.ivan@gmail.com>"]
 description = "Lib for generate and verify DCAP SGX Report received from Occlum"
