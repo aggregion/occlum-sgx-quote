@@ -29,13 +29,14 @@
 use std::fmt::Debug;
 use std::mem::size_of;
 use std::ops::Deref;
+use std::time::Instant;
 
 #[macro_use]
 extern crate lazy_static;
 
 pub use error::SGXError;
 use ioctl::IOCTL_CLIENT;
-use log::warn;
+use log::{trace, warn};
 pub use types::*;
 
 mod constants;
@@ -103,10 +104,15 @@ impl SGXQuote {
     /// [Occlum]: https://github.com/occlum/occlum
     /// [PCCS]: https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteGeneration/pccs/README.md
     pub fn from_report_data(data: &ReportData) -> Result<Self, SGXError> {
+        let start = Instant::now();
+
         let result = IOCTL_CLIENT
             .lock()
             .unwrap()
             .generate_quote(SGXReportData::new(*data))?;
+
+        trace!("Generated quote in {:?}ms", start.elapsed().as_millis());
+
         result.try_into()
     }
 
@@ -146,7 +152,10 @@ impl SGXQuote {
     /// }
     /// ```
     pub fn verify_result(&self) -> Result<SGXQuoteVerifyResult, SGXError> {
-        IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf.as_ref())
+        let start = Instant::now();
+        let result = IOCTL_CLIENT.lock().unwrap().verify_quote(self.buf.as_ref());
+        trace!("Verify quote in {:?}ms", start.elapsed().as_millis());
+        result
     }
 
     /// Verify [SGXQuote], if it is not valid, return error [`SGXError::VerifyQuoteFailed`]
